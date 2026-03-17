@@ -322,33 +322,39 @@ namespace ncTools {
             reseed(raw);  // reuse the mixer
         }
 
-        /**
-         * @brief Uniform random integer in [0, limit-1].
-         *
-         * Produces a perfectly unbiased value using rejection sampling.
-         * Avoids the bias present in a naive `rng() % limit`.
-         *
-         * Special cases:
-         *  - limit == 1         → always returns 0
-         *  - limit == UINT64_MAX → returns full 64-bit value directly (no bias, no rejection)
-         *  - limit > UINT64_MAX  → undefined behavior (do not use)
-         *
-         * @param limit Must be > 0 and ≤ UINT64_MAX
-         * @return r such that 0 ≤ r < limit, uniformly distributed.
-         */
-        inline uint64_t uniform(uint64_t limit) noexcept {
-            assert(limit > 0);
-            if (limit <= 1) return 0;
-            if (limit == UINT64_MAX) return operator()();
-
-            uint64_t threshold = (max() / limit) * limit;
-            uint64_t draw;
-            do {
-                draw = operator()();
-            } while (draw >= threshold);
-
-            return draw % limit;
-        }
+		/**
+		 * @brief Uniform random integer in [0, limit-1].
+		 *
+		 * Produces a perfectly unbiased value using rejection sampling.
+		 * Avoids the bias present in a naive `rng() % limit`.
+		 *
+		 * Special cases:
+		 *  - limit == 1         → always returns 0
+		 *
+		 * @param limit Must be > 0 and ≤ UINT64_MAX
+		 * @return r such that 0 ≤ r < limit, uniformly distributed.
+		 */
+		uint64_t uniform(uint64_t limit) noexcept {
+			if (limit <= 1) return 0;  // handle trivial cases (0 or 1)
+		
+			int lz = std::countl_zero(limit);  // number of leading zeros in limit
+		
+			// Compute the smallest power of 2 that is > limit.
+			// In general: 1ull << (64 - lz) gives the ceiling power-of-2.
+			uint64_t pow2 = 1ull << (64 - lz);
+		
+			// Mask = pow2 - 1 covers the range [0, pow2-1].
+			// Special case: when lz == 0 (limit has MSB set, i.e. limit >= 2^63),
+			// 64 - lz = 64 causes undefined behavior (shift by >= width).
+			// We fall back to full mask UINT64_MAX, which is correct for this range.
+			uint64_t mask = (lz != 0) ? pow2 - 1 : UINT64_MAX;
+		
+			uint64_t ranval = this->operator()() & mask;
+			while (ranval >= limit) {
+				ranval = this->operator()() & mask;
+			}
+			return ranval;
+		}
 
         /**
          * @brief Uniform random integer in [lo, hi], inclusive.
@@ -653,32 +659,39 @@ namespace ncTools {
 		// convenience RNG draws -- with explicit size
 		inline u64 draw64() { return this->operator()(); }
 		inline u32 draw32() { return (uint32_t)(this->operator()()); }
+		
 		/**
-	 * @brief Uniform random integer in [0, limit-1].
-	 *
-	 * Produces a perfectly unbiased value using rejection sampling.
-	 * Avoids the bias present in a naive `rng() % limit`.
-	 *
-	 * Special cases:
-	 *  - limit == 1         → always returns 0
-	 *  - limit == UINT64_MAX → returns full 64-bit value directly (no bias, no rejection)
-	 *  - limit > UINT64_MAX  → undefined behavior (do not use)
-	 *
-	 * @param limit Must be > 0 and ≤ UINT64_MAX
-	 * @return r such that 0 ≤ r < limit, uniformly distributed.
-	 */
-		inline uint64_t uniform(uint64_t limit) noexcept {
-			assert(limit > 0);
-			if (limit <= 1) return 0;
-			if (limit == UINT64_MAX) return operator()();
-
-			uint64_t threshold = (max() / limit) * limit;
-			uint64_t draw;
-			do {
-				draw = operator()();
-			} while (draw >= threshold);
-
-			return draw % limit;
+		 * @brief Uniform random integer in [0, limit-1].
+		 *
+		 * Produces a perfectly unbiased value using rejection sampling.
+		 * Avoids the bias present in a naive `rng() % limit`.
+		 *
+		 * Special cases:
+		 *  - limit == 1         → always returns 0
+		 *
+		 * @param limit Must be > 0 and ≤ UINT64_MAX
+		 * @return r such that 0 ≤ r < limit, uniformly distributed.
+		 */
+		uint64_t uniform(uint64_t limit) noexcept {
+			if (limit <= 1) return 0;  // handle trivial cases (0 or 1)
+		
+			int lz = std::countl_zero(limit);  // number of leading zeros in limit
+		
+			// Compute the smallest power of 2 that is > limit.
+			// In general: 1ull << (64 - lz) gives the ceiling power-of-2.
+			uint64_t pow2 = 1ull << (64 - lz);
+		
+			// Mask = pow2 - 1 covers the range [0, pow2-1].
+			// Special case: when lz == 0 (limit has MSB set, i.e. limit >= 2^63),
+			// 64 - lz = 64 causes undefined behavior (shift by >= width).
+			// We fall back to full mask UINT64_MAX, which is correct for this range.
+			uint64_t mask = (lz != 0) ? pow2 - 1 : UINT64_MAX;
+		
+			uint64_t ranval = this->operator()() & mask;
+			while (ranval >= limit) {
+				ranval = this->operator()() & mask;
+			}
+			return ranval;
 		}
 
 		/**
