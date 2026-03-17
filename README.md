@@ -9,7 +9,7 @@ A small collection of high-quality, non-cryptographic utilities in a single head
 
 ## Features
 
-- Header-only, no dependencies beyond C++17/20 intrinsics
+- 100% C++, Header-only, no dependencies beyond C++17/20 intrinsics
 - Passes PractRand (multi-TB) and SMHasher (full suite)
 - Deterministic seeding resistant to poor inputs
 - Minimal code size (~few hundred LOC core)
