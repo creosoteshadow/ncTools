@@ -1,3 +1,7 @@
+[<image-card alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" ></image-card>](https://opensource.org/licenses/MIT)
+<image-card alt="C++" src="https://img.shields.io/badge/language-C++-blue" ></image-card>
+<image-card alt="Header-only" src="https://img.shields.io/badge/header--only-yes-brightgreen" ></image-card>
+
 # ncTools
 
 A small collection of high-quality, non-cryptographic utilities in a single header.
