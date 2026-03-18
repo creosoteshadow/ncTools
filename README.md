@@ -5,11 +5,12 @@
 # ncTools
 
 A small collection of high-quality, non-cryptographic utilities in a single header.
-
-- **wyrand** — ultra-fast 64-bit PRNG (~13 GB/s), stream splitting
-- **RNG256** — 256-bit state PRNG, 2^256 period, 2^128 streams, ~4.2 GB/s
-- **CompactHash** — ~10 GB/s 128-bit hasher, SMHasher clean
-- **CompactHash_streaming** — incremental version (identical output)
+- Random Number Generators
+	- **wyrand** — ultra-fast 64-bit PRNG (~13 GB/s), Excellent for high speed, single stream applications
+	- **RNG256** — 256-bit state PRNG, 2^256 period, Versatile jump/discard for up to 2^128 streams, ~4.2 GB/s
+- Hash Functions
+	- **CompactHash** — ~10 GB/s 128-bit hasher, all-in-one hashing, SMHasher clean
+	- **CompactHash_streaming** — incremental version (identical output), streaming operators.
 
 ## Features
 
